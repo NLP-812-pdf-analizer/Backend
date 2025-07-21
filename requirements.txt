@@ -4,3 +4,5 @@ requests
 pydantic
 httpx
 python-multipart
+loguru
+pypdf

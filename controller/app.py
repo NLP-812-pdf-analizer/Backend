@@ -1,11 +1,11 @@
 from fastapi import FastAPI, Response, status, HTTPException, UploadFile, File
 from pydantic import BaseModel
-from fastapi.testclient import TestClient
+import requests
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 
 
-app = FastAPI(title="pdf loader", root_path="/api")
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,15 +16,14 @@ app.add_middleware(
 )
 
 @app.get("/api/health")
-def health() -> bool:
-    return True
+def health() -> str:
+    return "ok"
 
 @app.post("/api/graph")
-def get_graph(files: List[UploadFile] = File(...)):
+def get_graph(pdfFile: UploadFile = File(...)):
     # Здесь ваша ML-логика: обработка contents в пайплайне
     # запускаем функцию-затычку, которая 
     # загружаем класс-сервис и передает туда пдф, получая жсон
     # для начала просто извлекаем текст
     # затем создадим связь с другим микросервисом, куда перенесем этот класс
-    filenames = [file.filename for file in files]
-    return {"received_file": filenames}
+    return {"received_file": pdfFile.filename}
