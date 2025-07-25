@@ -1,4 +1,4 @@
-from controller.app import app
+from controller.main import app
 from fastapi.testclient import TestClient
 import tempfile
 

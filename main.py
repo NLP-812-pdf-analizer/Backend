@@ -1,4 +1,4 @@
-from controller.app import app
+from controller.main import app
 import uvicorn
 
 if __name__ == "__main__":

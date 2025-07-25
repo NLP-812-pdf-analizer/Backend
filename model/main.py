@@ -5,9 +5,9 @@ from fastapi import FastAPI, UploadFile
 from pypdf import PdfReader
 from io import BytesIO
 
-ml = FastAPI()
+app = FastAPI()
 
-@ml.post("/pdf_to_graph")
+@app.post("/pdf_to_graph")
 async def pdf_to_graph(received_pdf : UploadFile) -> dict[str,str]:
     pdf_bytes = await received_pdf.read()
 

@@ -1,12 +1,12 @@
 import io
 from fastapi.testclient import TestClient
 
-from model.ml_app import ml
+from model.main import app
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 
-client = TestClient(ml)
+client = TestClient(app)
 
 def test_pdf_to_graph_endpoint():
     test_text = "This is a test PDF"
