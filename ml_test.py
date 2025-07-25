@@ -1,7 +1,7 @@
 import io
 from fastapi.testclient import TestClient
 
-from model.main import ml
+from model.ml_app import ml
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter

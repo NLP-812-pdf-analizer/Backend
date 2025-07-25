@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Загрузка PDF и проверка соединения</title>
+    <style>
+        #file-input {
+            display: none;
+        }
+        button {
+            padding: 20px 180px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #status {
+            margin-top: 10px;
+        }
+        #result {
+            margin-top: 10px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .center {
+			text-align: center;
+		}
+    </style>
+</head>
+<body>
+    <div class="center">
+        <h1>Загрузите PDF для обработки в ML</h1>
+        <input type="file" id="file-input" accept=".pdf">
+        <button id="upload-button">Загрузить PDF</button>
+        <div id="status"></div>
+
+        <h2>Проверка соединения с бэкендом</h2>
+        <button id="health-check-button">Отправить health-запрос</button>
+        <p id="result"></p>
+    </div>
+        
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const uploadButton = document.getElementById('upload-button');
+        const statusDiv = document.getElementById('status');
+        const healthCheckButton = document.getElementById('health-check-button');
+        const resultP = document.getElementById('result');
+
+        // !!! ВАЖНО: Замените эту строку на ваш URL от ngrok !!!
+        //const API_BASE_URL = 'https://rp1wok-46-138-155-135.ru.tuna.am';
+
+        // При нажатии на кнопку "Загрузить PDF", открываем диалог выбора файла
+        uploadButton.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Когда файл выбран, начинаем загрузку
+        fileInput.addEventListener('change', async () => {
+            const file = fileInput.files[0];
+            if (!file) {
+                return;
+            }
+
+            statusDiv.textContent = `Загрузка файла: ${file.name}...`;
+            statusDiv.className = '';
+
+            const formData = new FormData();
+            formData.append('pdfFile', file);
+
+            try {
+                const response = await fetch(`/api/graph`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    statusDiv.textContent = 'Файл успешно загружен: ' + (result.message || JSON.stringify(result));
+                    statusDiv.className = 'success';
+                } else {
+                    const errorMessage = result.detail || response.statusText;
+                    statusDiv.textContent = `Ошибка загрузки: ${errorMessage}`;
+                    statusDiv.className = 'error';
+                }
+            } catch (error) {
+                statusDiv.textContent = 'Сетевая ошибка: ' + error.message;
+                statusDiv.className = 'error';
+            } finally {
+                // Сбрасываем значение инпута, чтобы можно было загрузить тот же файл снова
+                fileInput.value = '';
+            }
+        });
+
+        async function sendHealthRequest() {
+            resultP.textContent = 'Отправка запроса...';
+            resultP.className = '';
+            try {
+                // Обращаемся к эндпоинту /health
+                const response = await fetch(`/api/health`);
+                if (response.ok) {
+                    const data = await response.json();
+                    resultP.textContent = `Соединение успешно: ${JSON.stringify(data)}`;
+                    resultP.className = 'success';
+                } else {
+                    const text = await response.text();
+                    resultP.textContent = `Ошибка соединения: Код ${response.status}, Ответ: ${text}`;
+                    resultP.className = 'error';
+                }
+            } catch (error) {
+                resultP.textContent = `Не удалось отправить запрос: ${error}`;
+                resultP.className = 'error';
+            }
+        }
+
+        healthCheckButton.addEventListener('click', sendHealthRequest);
+    </script>
+</body>
+</html>
