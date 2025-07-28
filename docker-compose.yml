@@ -1,12 +1,10 @@
-version: "3.8"
-
 services:
   controller:
     build: ./controller
     ports:
-      - "6000:6000"
+      - "6007:6001"
 
   model:
     build: ./model
     ports:
-      - "6003:6000"
+      - "6008:6001"

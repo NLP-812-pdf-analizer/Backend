@@ -2,7 +2,7 @@
 # ручка на запрос с заглушкой-классом получения текста в жсон
 
 from fastapi import FastAPI, UploadFile
-from pypdf import PdfReader
+#from pypdf import PdfReader
 from io import BytesIO
 
 app = FastAPI()
