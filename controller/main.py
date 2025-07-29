@@ -1,11 +1,11 @@
 from fastapi import FastAPI, Response, status, HTTPException, UploadFile, File
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 import requests
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
 from loguru import logger
 import os
+import tempfile
+import shutil
 
 #from model.<main>.<ml entrypoint>
 
@@ -33,6 +33,10 @@ async def get_graph(pdfFile: UploadFile = File(...)):
     # для начала просто извлекаем текст
     # затем создадим связь с другим микросервисом, куда перенесем этот класс
     
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+
+
+
     try:
         file_content = await pdfFile.read()
         # передача в скрипт для извлечения
