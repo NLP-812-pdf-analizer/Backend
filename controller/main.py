@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Response, status, HTTPException, UploadFile, File
 from fastapi.staticfiles import StaticFiles
-import requests
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 import os
@@ -34,35 +33,21 @@ async def get_graph(pdfFile: UploadFile = File(...)):
     # затем создадим связь с другим микросервисом, куда перенесем этот класс
     
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-
-
-
-    try:
-        file_content = await pdfFile.read()
-        # передача в скрипт для извлечения
-
-        # получаем байтовый объект со строками?
-
-        model_url = os.getenv("MODEL_URL")
-        if not model_url:
-            return {"error": "MODEL_URL is not set in env"}
-        
-        request = {
-            "text" : [] # массив строк
-        }
+        shutil.copyfileobj(pdfFile.file, temp_file)
+        temp_file_path = temp_file.name
 
         try:
-            model_response = requests.post(model_url, json=request)
-            model_response.raise_for_status()
-            graph_data = model_response.json()
-        except requests.exceptions.RequestException as e:
-            print(f"Error with model requst: {e}")
+            # вызов функции АПИ модели
+            functional_graph, hierarchical_graph = 100,200 #await model(temp_file_path)  # Assuming model is an async function
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Error processing pdf file") from e
+        finally:
+            os.remove(temp_file_path)
 
-        return graph_data
+    return {
+        "functional": functional_graph,
+        "hierarchical": hierarchical_graph
+    }
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Error processing pdf file") from e
-    finally:
-        pdfFile.file.close()
 
 app.mount("/", StaticFiles(directory="view", html=True),name="view")
