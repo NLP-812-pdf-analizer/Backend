@@ -5,6 +5,7 @@ python-multipart
 loguru
 pypdf
 pathlib
+json
 spacy>=3.0.0,<4.0.0
 transformers>=4.0.0
 torch>=1.0.0
