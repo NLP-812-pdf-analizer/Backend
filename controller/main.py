@@ -5,10 +5,9 @@ import requests
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from loguru import logger
-from dotenv import load_dotenv
 import os
 
-load_dotenv()
+#from model.<main>.<ml entrypoint>
 
 app = FastAPI()
 

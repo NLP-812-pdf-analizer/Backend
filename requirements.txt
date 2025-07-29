@@ -1,7 +1,6 @@
 fastapi
 uvicorn
 requests
-pydantic
 httpx
 python-multipart
 loguru

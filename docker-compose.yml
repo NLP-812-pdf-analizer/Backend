@@ -1,10 +1,10 @@
 services:
-  controller:
-    build: ./controller
-    ports:
-      - "6007:6001"
+  backend:
+    restart: always
 
-  model:
-    build: ./model
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "6008:6001"
+      # 6080 на сервере направит на 6080 внутри контейнера
+      - "6080:6080"
