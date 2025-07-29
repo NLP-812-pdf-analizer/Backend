@@ -1,12 +1,13 @@
 from fastapi import FastAPI, Response, status, HTTPException, UploadFile, File
 from fastapi.staticfiles import StaticFiles
+from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 import os
 import tempfile
 import shutil
 
-#from model.<main>.<ml entrypoint>
+from model.ner_inf import api_extract_graphs_from_pdf
 
 app = FastAPI()
 
@@ -31,15 +32,19 @@ async def get_graph(pdfFile: UploadFile = File(...)):
     # загружаем класс-сервис и передает туда пдф, получая жсон
     # для начала просто извлекаем текст
     # затем создадим связь с другим микросервисом, куда перенесем этот класс
-    
+    # Путь к папке с моделью, а не к конкретному файлу
+    model_path = "../model"
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
         shutil.copyfileobj(pdfFile.file, temp_file)
         temp_file_path = temp_file.name
 
         try:
-            # вызов функции АПИ модели
-            functional_graph, hierarchical_graph = 100,200 #await model(temp_file_path)  # Assuming model is an async function
+            # Запускаем блокирующую функцию в отдельном потоке, чтобы не блокировать event loop
+            functional_graph, hierarchical_graph = await run_in_threadpool(
+                api_extract_graphs_from_pdf, temp_file_path, model_path
+            )
         except Exception as e:
+            logger.error(f"Ошибка при обработке PDF: {e}")
             raise HTTPException(status_code=500, detail="Error processing pdf file") from e
         finally:
             os.remove(temp_file_path)
