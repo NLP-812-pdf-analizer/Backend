@@ -4,7 +4,7 @@ from transformers import pipeline
 from transformers import AutoTokenizer
 from pathlib import Path
 
-from extract_clean_text.py import extract_clean_text  # Импорт из соседнего файла
+from extract_clean_text import extract_clean_text  # Импорт из соседнего файла
 
 def extract_graphs_from_text(text_path: str, model_dir: str, output_dir: str = "."):
     """
