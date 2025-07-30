@@ -3,10 +3,7 @@ uvicorn
 httpx
 python-multipart
 loguru
-pypdf
 PyMuPDF>=1.24.0 
-pathlib
-json
 spacy>=3.0.0,<4.0.0
 transformers>=4.0.0
 torch>=1.0.0

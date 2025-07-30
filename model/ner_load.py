@@ -1,6 +1,5 @@
 import os
 import gdown
-from pathlib import Path
 
 # Установка gdown (если нет)
 try:
