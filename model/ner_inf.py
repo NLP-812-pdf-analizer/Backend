@@ -5,7 +5,7 @@ from transformers import pipeline
 from transformers import AutoTokenizer
 from pathlib import Path
 
-from extract_clean_text import extract_clean_text  # Импорт из соседнего файла
+from .extract_clean_text import extract_clean_text  # Импорт из соседнего файла
 
 def _extract_graphs_internal(text: str, model_dir: str):
     """Внутренняя функция для извлечения графов, инкапсулирующая основную логику."""
