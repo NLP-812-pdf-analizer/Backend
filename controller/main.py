@@ -35,7 +35,7 @@ async def get_graph(pdfFile: UploadFile = File(...)):
 
     # затем создадим связь с другим микросервисом, куда перенесем этот класс
     # Путь к папке с моделью, а не к конкретному файлу
-    model_config_path = "."
+    model_config_path = "model/model"
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
         shutil.copyfileobj(pdfFile.file, temp_file)
         temp_file_path = temp_file.name
@@ -45,7 +45,7 @@ async def get_graph(pdfFile: UploadFile = File(...)):
             logger.info(f"saved as {temp_file_path} and its status is: {os.path.exists(temp_file_path)}")
             # Запускаем блокирующую функцию в отдельном потоке, чтобы не блокировать event loop
             functional_graph, hierarchical_graph = await run_in_threadpool(
-                api_extract_graphs_from_pdf, temp_file_path, model_path
+                api_extract_graphs_from_pdf, temp_file_path, model_config_path
             )
         except Exception as e:
             logger.error(f"Ошибка при обработке PDF: {e}")
