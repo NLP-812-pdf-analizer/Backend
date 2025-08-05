@@ -7,13 +7,18 @@ def download_files():
     # Пример: файл "model.safetensors" из Google Drive
     file_url = "https://drive.google.com/drive/folders/1KqgJlybuhWlPsGu_UmRkCFWYXv3sILNk?usp=sharing"
 
-    # Путь к текущей папке (где лежит .py файл)
-    output_folder = os.path.dirname(os.path.abspath(__file__))
+    # Получаем путь к директории, где находится текущий скрипт
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Создаем полный путь к папке model
+    output_folder = os.path.join(script_dir, "model")
     
-    print(f"Скачиваю файлы в {output_folder}...")
+    # Создаем папку, если она не существует
+    os.makedirs(output_folder, exist_ok=True)
+    
+    print(f"Скачиваю всю папку из Google Drive в {output_folder}...")
     gdown.download_folder(file_url, output=output_folder, quiet=False)
 
 download_files()
-#files_list = os.listdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "model"))
-files_list = os.listdir(os.path.dirname(os.path.abspath(__file__)))
+files_list = os.listdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "model"))
+#files_list = os.listdir(os.path.dirname(os.path.abspath(__file__)))
 logger.info(f"Готово! Скачанные файлы: {files_list}")
