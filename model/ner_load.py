@@ -1,12 +1,6 @@
 import os
 import gdown
-
-# Установка gdown (если нет)
-try:
-    import gdown
-except ImportError:
-    os.system("pip install gdown")
-    import gdown
+from loguru import logger
 
 # Скачивание файлов в текущую папку
 def download_files():
@@ -21,8 +15,6 @@ def download_files():
     print(f"Скачиваю всю папку из Google Drive в {output_folder}...")
     gdown.download_folder(file_url, output=output_folder, quiet=False)
 
-if __name__ == "__main__":
-    download_files()
-    print("Готово! Скачанные файлы:")
-    # Показываем содержимое папки model
-    print(os.listdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "model")))
+download_files()
+files_list = os.listdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "model"))
+logger.info(f"Готово! Скачанные файлы: {files_list}")

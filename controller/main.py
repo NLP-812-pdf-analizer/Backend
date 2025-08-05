@@ -35,7 +35,7 @@ async def get_graph(pdfFile: UploadFile = File(...)):
 
     # затем создадим связь с другим микросервисом, куда перенесем этот класс
     # Путь к папке с моделью, а не к конкретному файлу
-    model_config_path = ".."
+    model_config_path = "."
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
         shutil.copyfileobj(pdfFile.file, temp_file)
         temp_file_path = temp_file.name
