@@ -273,8 +273,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Извлечение графов из текста')
     parser.add_argument('--text', type=str, required=True, help='Путь к текстовому файлу')
     parser.add_argument('--model', type=str, required=True, help='Путь к папке с моделью NER')
-    parser.add_argument('--output', type=str, default="output", help='Папка для сохранения результатов')
+    #parser.add_argument('--output', type=str, default="output", help='Папка для сохранения результатов')
     
     args = parser.parse_args()
     
-    extract_graphs_from_text_file(args.text, args.model, args.output)
+    #extract_graphs_from_text_file(args.text, args.model, args.output)
+    api_extract_graphs_from_pdf(args.text, args.model)
