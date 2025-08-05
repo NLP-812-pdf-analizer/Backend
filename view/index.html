@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Загрузка PDF и проверка соединения</title>
+    <title>Визуализация графа из PDF</title>
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
     <style>
+        body { font-family: Arial, sans-serif; }
         #file-input {
             display: none;
         }
@@ -23,9 +25,6 @@
         #status {
             margin-top: 10px;
         }
-        #result {
-            margin-top: 10px;
-        }
         .success {
             color: green;
         }
@@ -35,6 +34,21 @@
         .center {
 			text-align: center;
 		}
+        #graphs-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .graph-wrapper {
+            width: 48%;
+        }
+        .cy-container {
+            width: 100%;
+            height: 70vh; /* 70% высоты окна */
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            text-align: left; /* Сброс унаследованного выравнивания */
+        }
     </style>
 </head>
 <body>
@@ -43,21 +57,71 @@
         <input type="file" id="file-input" accept=".pdf">
         <button id="upload-button">Загрузить PDF</button>
         <div id="status"></div>
-
-        <h2>Проверка соединения с бэкендом</h2>
-        <button id="health-check-button">Отправить health-запрос</button>
-        <p id="result"></p>
+    </div>
+    
+    <div id="graphs-container">
+        <div class="graph-wrapper center">
+            <h2>Функциональный граф</h2>
+            <div id="cy-functional" class="cy-container"></div>
+        </div>
+        <div class="graph-wrapper center">
+            <h2>Иерархический граф</h2>
+            <div id="cy-hierarchical" class="cy-container"></div>
+        </div>
     </div>
         
     <script>
         const fileInput = document.getElementById('file-input');
         const uploadButton = document.getElementById('upload-button');
         const statusDiv = document.getElementById('status');
-        const healthCheckButton = document.getElementById('health-check-button');
-        const resultP = document.getElementById('result');
 
-        // !!! ВАЖНО: Замените эту строку на ваш URL от ngrok !!!
-        //const API_BASE_URL = 'https://rp1wok-46-138-155-135.ru.tuna.am';
+        /**
+         * Отрисовывает граф в указанном контейнере с помощью Cytoscape.js.
+         * @param {string} containerId - ID DOM-элемента для графа.
+         * @param {object} graphData - Данные графа, полученные с сервера.
+         */
+        function renderGraph(containerId, graphData) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = ''; // Очищаем контейнер перед новой отрисовкой
+
+            if (!graphData || !graphData.graph || graphData.graph.length === 0) {
+                container.textContent = 'Нет данных для отображения графа.';
+                return;
+            }
+
+            const nodesSet = new Set();
+            const elements = [];
+
+            // Преобразуем данные в формат, понятный Cytoscape
+            graphData.graph.forEach(edge => {
+                nodesSet.add(edge.source);
+                nodesSet.add(edge.target);
+                elements.push({
+                    group: 'edges',
+                    data: {
+                        id: `${edge.source}-${edge.target}-${edge.relation}`, // Уникальный ID для ребра
+                        source: edge.source,
+                        target: edge.target,
+                        label: edge.relation
+                    }
+                });
+            });
+
+            nodesSet.forEach(node => {
+                elements.push({
+                    group: 'nodes',
+                    data: { id: node, label: node }
+                });
+            });
+
+            // Инициализация Cytoscape
+            cytoscape({
+                container: container,
+                elements: elements,
+                style: cytoscapeStyle, // Используем общий стиль
+                layout: { name: 'cose', animate: true, padding: 10, nodeDimensionsIncludeLabels: true }
+            });
+        }
 
         // При нажатии на кнопку "Загрузить PDF", открываем диалог выбора файла
         uploadButton.addEventListener('click', () => {
@@ -86,8 +150,12 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    statusDiv.textContent = 'Файл успешно загружен: ' + (result.message || JSON.stringify(result));
+                    statusDiv.textContent = 'Файл успешно загружен. Отрисовка графов...';
                     statusDiv.className = 'success';
+
+                    // Отрисовываем оба графа
+                    renderGraph('cy-functional', result.functional);
+                    renderGraph('cy-hierarchical', result.hierarchical);
                 } else {
                     const errorMessage = result.detail || response.statusText;
                     statusDiv.textContent = `Ошибка загрузки: ${errorMessage}`;
@@ -102,28 +170,34 @@
             }
         });
 
-        async function sendHealthRequest() {
-            resultP.textContent = 'Отправка запроса...';
-            resultP.className = '';
-            try {
-                // Обращаемся к эндпоинту /health
-                const response = await fetch(`/api/health`);
-                if (response.ok) {
-                    const data = await response.json();
-                    resultP.textContent = `Соединение успешно: ${JSON.stringify(data)}`;
-                    resultP.className = 'success';
-                } else {
-                    const text = await response.text();
-                    resultP.textContent = `Ошибка соединения: Код ${response.status}, Ответ: ${text}`;
-                    resultP.className = 'error';
+        // Общий стиль для графов
+        const cytoscapeStyle = [
+            {
+                selector: 'node',
+                style: {
+                    'background-color': '#666',
+                    'label': 'data(label)',
+                    'text-valign': 'center',
+                    'color': 'white',
+                    'text-outline-width': 2,
+                    'text-outline-color': '#666'
                 }
-            } catch (error) {
-                resultP.textContent = `Не удалось отправить запрос: ${error}`;
-                resultP.className = 'error';
+            },
+            {
+                selector: 'edge',
+                style: {
+                    'width': 3,
+                    'line-color': '#ccc',
+                    'target-arrow-color': '#ccc',
+                    'target-arrow-shape': 'triangle',
+                    'label': 'data(label)',
+                    'font-size': '10px',
+                    'text-background-opacity': 1,
+                    'text-background-color': '#fff',
+                    'curve-style': 'bezier'
+                }
             }
-        }
-
-        healthCheckButton.addEventListener('click', sendHealthRequest);
+        ];
     </script>
 </body>
 </html>

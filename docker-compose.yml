@@ -1,7 +1,8 @@
 services:
   backend:
     restart: always
-
+    volumes:
+      - ./view:/app/view
     build:
       context: .
       dockerfile: Dockerfile
