@@ -3,6 +3,7 @@ uvicorn
 httpx
 python-multipart
 loguru
+gdown
 PyMuPDF>=1.24.0 
 spacy>=3.0.0,<4.0.0
 transformers>=4.0.0

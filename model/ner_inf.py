@@ -4,6 +4,7 @@ import os
 from transformers import pipeline
 from transformers import AutoTokenizer
 from pathlib import Path
+from loguru import logger
 
 from .extract_clean_text import extract_clean_text  # Импорт из соседнего файла
 
@@ -226,11 +227,9 @@ def extract_graphs_from_text_content(text_content: str, model_dir: str):
     func_graph, hier_graph = _extract_graphs_internal(text_content, model_dir)
     
     # Форматирование результатов в JSON-строки
-    functional =  {"graph": [{"source": rel[0], "relation": rel[1], "target": rel[2]} for rel in func_graph]},
-        
-    hierarchical = {"graph": [{"source": rel[0], "relation": rel[1], "target": rel[2]} for rel in hier_graph]},
-      
-
+    functional = {"graph": [{"source": rel[0], "relation": rel[1], "target": rel[2]} for rel in func_graph]}
+    hierarchical = {"graph": [{"source": rel[0], "relation": rel[1], "target": rel[2]} for rel in hier_graph]}
+    
     return functional, hierarchical
 
 def api_extract_graphs_from_pdf(pdf_path: str, model_path: str = None):
@@ -245,6 +244,7 @@ def api_extract_graphs_from_pdf(pdf_path: str, model_path: str = None):
     Returns:
         tuple: Две JSON-строки (функциональный граф, иерархический граф)
     """
+    logger.info(f"got file {pdf_path} and model is on {model_path}")
     # Определяем путь к модели
     if model_path is None:
         # Ищем модель в текущей директории
@@ -273,8 +273,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Извлечение графов из текста')
     parser.add_argument('--text', type=str, required=True, help='Путь к текстовому файлу')
     parser.add_argument('--model', type=str, required=True, help='Путь к папке с моделью NER')
-    parser.add_argument('--output', type=str, default="output", help='Папка для сохранения результатов')
+    #parser.add_argument('--output', type=str, default="output", help='Папка для сохранения результатов')
     
     args = parser.parse_args()
     
-    extract_graphs_from_text_file(args.text, args.model, args.output)
+    #extract_graphs_from_text_file(args.text, args.model, args.output)
+    api_extract_graphs_from_pdf(args.text, args.model)

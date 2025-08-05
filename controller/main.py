@@ -23,6 +23,7 @@ app.add_middleware(
 
 @app.get("/api/health")
 async def health() -> str:
+    logger.info("health checked")
     return "ok"
 
 @app.post("/api/graph")
@@ -31,14 +32,17 @@ async def get_graph(pdfFile: UploadFile = File(...)):
     # запускаем функцию-затычку, которая 
     # загружаем класс-сервис и передает туда пдф, получая жсон
     # для начала просто извлекаем текст
+
     # затем создадим связь с другим микросервисом, куда перенесем этот класс
     # Путь к папке с моделью, а не к конкретному файлу
-    model_path = "../model"
+    model_config_path = ".."
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
         shutil.copyfileobj(pdfFile.file, temp_file)
         temp_file_path = temp_file.name
 
         try:
+            logger.info(f"got file {temp_file.name}")
+            logger.info(f"saved as {temp_file_path} and its status is: {os.path.exists(temp_file_path)}")
             # Запускаем блокирующую функцию в отдельном потоке, чтобы не блокировать event loop
             functional_graph, hierarchical_graph = await run_in_threadpool(
                 api_extract_graphs_from_pdf, temp_file_path, model_path
@@ -49,6 +53,7 @@ async def get_graph(pdfFile: UploadFile = File(...)):
         finally:
             os.remove(temp_file_path)
 
+    logger.info(f"finished with functional str as {functional_graph}")
     return {
         "functional": functional_graph,
         "hierarchical": hierarchical_graph
